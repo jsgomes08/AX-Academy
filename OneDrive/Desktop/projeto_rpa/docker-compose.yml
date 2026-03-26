@@ -1,0 +1,15 @@
+services:
+  bots:
+    build: .
+    container_name: bots-automacao
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - TZ=America/Manaus
+    volumes:
+      - .:/app
+    command: >
+      sh -c "python bots/bot-eventim.py &&
+             python bots/bot-planilhas.py &&
+             python bots/bot-telegram.py"

@@ -1,0 +1,20 @@
+PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
+# Cada linha tem o formato:
+# minuto  hora  dia_do_mes  mes  dia_da_semana  comando
+#
+# *     = qualquer valor
+# */6   = a cada 6 unidades
+# 0 */6 = no minuto 0, a cada 6 horas (00:00, 06:00, 12:00, 18:00)
+# Roda o monitor do ML a cada 6 horas
+# cd /app: entra na pasta do projeto antes de rodar
+# >>: redireciona a saida para o arquivo de log (acumulando)
+# 2>&1: redireciona os erros para o mesmo arquivo de log
+# 0 */6 * * * cd /app && python monitor_ml_completo.py >> /var/log/cron.log 2>&1
+# 1 */6 * * * cd /app && python monitor_ml_completo.py >> /var/log/cron.log 2>&1
+# 2 */6 * * * cd /app && python monitor_ml_completo.py >> /var/log/cron.log 2>&1
+# Roda todo dia as 11 da manhã
+0 11 * * * cd /app && /usr/local/bin/python bots/bot-eventim.py && /usr/local/bin/python bots/bot-planilhas.py && /usr/local/bin/python bots/bot-telegram.py >> /var/log/cron.log 2>&1
+
+# Linha em branco obrigatoria no final
+# OBRIGATORIO: o cron ignora arquivos sem linha em branco no final

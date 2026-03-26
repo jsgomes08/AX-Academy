@@ -24,7 +24,7 @@ def conectar_planilha():
     client = gspread.authorize(cred)
     return client.open(SHEET_NAME) 
 
-def processar_primeiro_csv():
+def processar_csv():
     planilha = conectar_planilha()
     
     arquivos_csv = [f for f in os.listdir(PASTA_DADOS) if f.endswith('.csv')]
@@ -33,26 +33,23 @@ def processar_primeiro_csv():
         print("Nenhum arquivo CSV encontrado na pasta.")
         return
 
-    # Pega apenas o primeiro arquivo CSV gerado pelo Bot 1
     nome_arquivo = arquivos_csv[0]
     caminho_csv = os.path.join(PASTA_DADOS, nome_arquivo)
     novo_titulo = nome_arquivo.replace(".csv", "")
     
-    aba = planilha.get_worksheet(0) # Trabalha apenas na primeira aba
+    aba = planilha.get_worksheet(0) 
     
     if aba.title != novo_titulo:
-        print(f"Renomeando aba para '{novo_titulo}'...")
+        print(f"Renomeando aba para '{novo_titulo}'")
         aba.update_title(novo_titulo)
 
-    print("Limpando a planilha para sobrescrever os dados...")
+    print("Atualizando planilha com últimos dados coletados:")
     aba.clear() 
 
     dados_completos = [[
         'Setor', 'Modalidade de Ingresso', 'Preço (R$)', 
         'Disponibilidade', 'Data de Rastreio'
     ]]
-    
-    data_rastreio = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     with open(caminho_csv, mode='r', encoding='utf-8') as file:
         leitor_csv = csv.DictReader(file)
@@ -63,7 +60,7 @@ def processar_primeiro_csv():
                 linha.get('nome', ''),
                 linha.get('preco', ''),
                 status_disponivel,
-                data_rastreio
+                linha.get('coletado em', '')
             ]
             dados_completos.append(nova_linha)
 
@@ -74,4 +71,4 @@ def processar_primeiro_csv():
         print("O arquivo CSV está vazio ou sem dados válidos.")
 
 if __name__ == "__main__":
-    processar_primeiro_csv()
+    processar_csv()

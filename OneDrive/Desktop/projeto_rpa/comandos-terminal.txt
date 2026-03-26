@@ -1,0 +1,128 @@
+-----
+
+INSTALAR DEPENDENCIAS PYTHON
+
+-----
+
+pip install twilio python-dotenv
+
+# ou, se tiver o requirements.txt completo:
+
+pip install -r requirements.txt
+
+-----
+
+INSTALAR O DOCKER NO UBUNTU 
+
+-----
+
+# Passo 1: instala o Docker Engine
+
+curl -fsSL https://get.docker.com | sh
+
+# Passo 2: adiciona o usuario ao grupo docker
+
+# (feche o terminal e abra um novo apos este comando)
+
+sudo usermod -aG docker $USER
+
+# Passo 3: verifica a versao do Docker
+
+docker –version
+
+# Passo 4: adiciona o repositorio oficial do Docker
+
+sudo apt-get install -y ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg –dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo   
+“deb [arch=$(dpkg –print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu   
+$(. /etc/os-release && echo “$VERSION_CODENAME”) stable” |   
+sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Passo 5: instala o plugin do Compose
+
+sudo apt-get update
+sudo apt-get install -y docker-compose-plugin
+
+# Passo 6: verifica o Compose
+
+docker compose version
+
+-----
+
+COMANDOS DOCKER
+
+-----
+
+# Construir a imagem (rode na pasta do projeto)
+
+sudo docker compose build
+
+# Subir o container em background
+
+sudo docker compose up -d
+
+# Ver o status dos containers
+
+sudo docker compose ps
+
+# Ver os logs em tempo real (Ctrl+C para sair)
+
+docker compose logs -f
+
+# Parar e remover o container
+
+docker compose down
+
+# Reconstruir apos mudancas no Dockerfile ou no crontab
+
+docker compose down && docker compose build && docker compose up -d
+
+# Testar o bot manualmente dentro do container
+
+docker compose exec bots /usr/local/bin/python monitor_ml_completo.py
+
+# Descobrir o caminho do Python dentro do container
+
+docker compose exec bots which python
+
+# Ver os agendamentos registrados no cron
+
+docker compose exec bots crontab -l
+
+# Abrir um terminal interativo dentro do container
+
+docker compose exec bots bash
+
+# Ver o arquivo de log do cron dentro do container
+
+docker compose exec bots tail -f /var/log/cron.log
+
+-----
+
+DICAS RAPIDAS
+
+-----
+
+# Ver os arquivos da pasta atual
+
+ls
+
+# Criar ou editar um arquivo
+
+nano nome_do_arquivo.py
+
+# Salvar no nano:  Ctrl+O  -> Enter
+
+# Sair do nano:    Ctrl+X
+
+# Ver o horario atual do sistema (util para conferir timezone)
+
+date
+
+# Ver o horario dentro do container
+
+docker compose exec bots date

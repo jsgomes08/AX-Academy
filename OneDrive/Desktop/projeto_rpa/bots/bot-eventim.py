@@ -12,7 +12,7 @@ PASTA_DADOS = os.path.join(BASE_DIR, "dados_csv")
 os.makedirs(PASTA_DADOS, exist_ok=True)
 
 def encontrar_shows(page):
-    page.goto(URL_PATH, wait_until="domcontentloaded")
+    page.goto(URL_PATH)
     time.sleep(3)
     page.wait_for_selector('[data-qa="event-listing-item"]')
     
@@ -58,10 +58,7 @@ def coletar_ingressos(page):
         classes = el.get_attribute("class") or ""
 
         if "event-list-head" in classes:
-            try:
-                setor_atual = el.locator(".pc-list-category span").text_content().strip()
-            except:
-                setor_atual = "DESCONHECIDO"
+            setor_atual = el.locator(".pc-list-category span").text_content().strip()
 
         elif "ticket-type-list" in classes:
             items = el.locator('[data-qa="tickettype"]')
@@ -69,7 +66,7 @@ def coletar_ingressos(page):
                 item = items.nth(j)
                 try:
                     nome = item.get_attribute("data-tt-name")
-                    preco_str = item.locator('[data-qa="tickettypeItem-price"]').text_content()
+                    preco_str = item.locator('[data-qa="tickettypeItem-price"]').text_content() #string é capturada com espaço inquebravel
                     preco = formatar_preco(preco_str)
                     
                     indisponivel = item.locator('[data-qa="ticket-type-unavailable"]').count() > 0
@@ -94,31 +91,25 @@ def formatar_data(data):
     return data.replace(" ", "").replace(".", "-")
 
 def salvar_csv(evento, ingressos):
-    nome_arquivo = f"{evento['cidade'].lower().replace(' ', '-')}-{formatar_data(evento['data'])}.csv"
+    data = formatar_data(evento['data'])
+    nome_arquivo = f"{evento['cidade'].lower().replace(' ', '-')}-{data}.csv"
     caminho = os.path.join(PASTA_DADOS, nome_arquivo)
 
     with open(caminho, mode="w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=["setor", "nome", "preco", "disponivel", "coletado em"])
         writer.writeheader()
         writer.writerows(ingressos)
-    print(f"Ficheiro CSV salvo em: {caminho}")
+    print(f"Arquivo CSV salvo em: {caminho}")
 
 def main():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-        page.set_default_timeout(60000)
 
         eventos = encontrar_shows(page)
-        
-        if not eventos:
-            print("Nenhum show encontrado na página.")
-            browser.close()
-            return
 
-        # Foca apenas no primeiro evento da lista
         primeiro_evento = eventos[0]
-        print(f"\n=== ACESSANDO APENAS O PRIMEIRO SHOW: {primeiro_evento['cidade']} ===")
+        print(f"Coletando informações do show em: {primeiro_evento['cidade']}")
         
         try:
             page.goto(primeiro_evento["link"], wait_until="domcontentloaded")
@@ -126,9 +117,8 @@ def main():
             ingressos = coletar_ingressos(page)
             salvar_csv(primeiro_evento, ingressos)
         except Exception as e:
-            print(f"Erro ao extrair {primeiro_evento['cidade']}: {e}")
+            print(f"Erro ao extrair informações de {primeiro_evento['cidade']}: {e}")
 
-        print("\n=== PROCESSO FINALIZADO ===")
         browser.close()
 
 if __name__ == "__main__":

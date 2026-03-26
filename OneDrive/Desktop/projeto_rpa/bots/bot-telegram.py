@@ -24,7 +24,7 @@ def conectar_planilha():
     client = gspread.authorize(cred)
     return client.open(SHEET_NAME) 
 
-def formatar_moeda_br(valor):
+def formatar_preco(valor):
     try:
         if isinstance(valor, (int, float)):
             return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
@@ -49,7 +49,7 @@ def enviar_mensagem_telegram(mensagem):
     except Exception as e:
         print(f"Erro ao enviar mensagem para o Telegram: {e}")
 
-def verificar_e_notificar_primeira_aba():
+def verificar_planilha_e_notificar():
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         print("Erro: Credenciais do Telegram ausentes!")
         return
@@ -58,7 +58,6 @@ def verificar_e_notificar_primeira_aba():
     try:
         planilha = conectar_planilha()
         
-        # Lê apenas a primeira aba
         aba = planilha.get_worksheet(0) 
         nome_da_aba = aba.title
         
@@ -77,14 +76,13 @@ def verificar_e_notificar_primeira_aba():
             print("Nenhum ingresso disponível no momento.")
             return
 
-        # Título dinâmico da mensagem
-        mensagem = f"🎟️ <b>Ingressos encontrados para {nome_da_aba}</b> 🎟️\n\n"
+        mensagem = f" <b>Ingressos encontrados para Show do Rush em {nome_da_aba}</b> \n\n"
         
         limite_exibicao = 15
         for ing in disponiveis[:limite_exibicao]:
             setor = ing.get('Setor', 'Desconhecido')
             modalidade = ing.get('Modalidade de Ingresso', 'Desconhecida')
-            preco_formatado = formatar_moeda_br(ing.get('Preço (R$)', '0,00'))
+            preco_formatado = formatar_preco(ing.get('Preço (R$)', '0,00'))
             
             mensagem += f"📍 <b>{setor}</b>\n🎟️ {modalidade} | 💰 R$ {preco_formatado}\n\n"
 
@@ -101,4 +99,4 @@ def verificar_e_notificar_primeira_aba():
         print(f"Erro durante a leitura da planilha ou envio: {e}")
 
 if __name__ == "__main__":
-    verificar_e_notificar_primeira_aba()
+    verificar_planilha_e_notificar()
