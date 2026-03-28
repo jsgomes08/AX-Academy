@@ -142,12 +142,12 @@ O projeto usa `cron` dentro do container para execução automática.
 ### Exemplo configurado:
 
 ```
-30 22 * * * cd /app && python bots/bot-eventim.py && python bots/bot-planilhas.py && python bots/bot-telegram.py >> /var/log/cron.log 2>&1
+30 23 * * * cd /app && python bots/bot-eventim.py && python bots/bot-planilhas.py && python bots/bot-telegram.py >> /var/log/cron.log 2>&1
 ```
 
 ### Isso significa:
 
-* Executa **todos os dias às 22:30**
+* Executa **todos os dias às 23:30**
 * Roda os bots **em sequência**
 * Só executa o próximo se o anterior tiver sucesso
 
@@ -172,18 +172,7 @@ cat /var/log/cron.log
 # ⚠️ Observações Importantes
 
 * O `bot-eventim` deve rodar apenas **1x por dia**
-* O uso de `&&` evita execução em cascata em caso de erro
 * Playwright roda em modo headless no container
-
----
-
-# 🚀 Possíveis melhorias futuras
-
-* Histórico de preços
-* Alertas apenas para mudanças
-* Integração com banco de dados
-* Dashboard web
-* Suporte a múltiplos eventos
 
 ---
 
